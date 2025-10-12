@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### Nix ### 
+.envrc
+.direnv
+flake.nix
+flake.lock
