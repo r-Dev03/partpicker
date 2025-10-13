@@ -6,6 +6,10 @@ Welcome to Java Frameworks! This is an opportunity for students to implement use
 FOR SPECIFIC TASK INSTRUCTIONS AND REQUIREMENTS FOR THIS ASSESSMENT, PLEASE REFER TO THE COURSE PAGE.
 
 ## C. Customize the HTML user interface for your customer’s application. The user interface should include the shop name, the product names, and the names of the parts.
+```html 
+    Line 14: <title>Spiffy Computer Parts</title>
+    Line 19: <h1>Computer Parts</h1>
+```
 
 ## D. Add an “About” page to the application to describe your chosen customer’s company to web viewers and include navigation to and from the “About” page and the main screen.
 
