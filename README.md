@@ -12,6 +12,35 @@ FOR SPECIFIC TASK INSTRUCTIONS AND REQUIREMENTS FOR THIS ASSESSMENT, PLEASE REFE
 ```
 
 ## D. Add an “About” page to the application to describe your chosen customer’s company to web viewers and include navigation to and from the “About” page and the main screen.
+### About.html
+```html
+    <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>About Us</title>
+  </head>
+  <body>
+    <p>
+      Spiffy Computer Parts is your one stop shop to building or customizing the perfect rig! Profits are an afterthought, first comes first, getting you a good deal!
+    </p>
+    <a href="/">Link to Main Screen</a>
+  </body>
+</html>
+```
+
+### Mainscreen.html - Line 89
+```html
+<a th:href="@{about}">About us... </a>
+```
+
+### MainScreenControllerr - Lines 56-59
+```java
+@RequestMapping("/about")
+public String about() {
+    return "about"; 
+}
+```
 
 ## E. Add a sample inventory appropriate for your chosen store to the application. You should have five parts and five products in your sample inventory and should not overwrite existing data in the database. 
 
