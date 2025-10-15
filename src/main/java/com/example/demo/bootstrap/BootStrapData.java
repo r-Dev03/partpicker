@@ -92,7 +92,7 @@ public class BootStrapData implements CommandLineRunner {
 
       InhousePart RAM64GB = new InhousePart();
       RAM64GB.setName("RAM64GB");
-            RAM64GB.setPrice(49.99);
+            RAM64GB.setPrice(59.99);
             RAM64GB.setInv(10);
 
 
@@ -104,7 +104,7 @@ public class BootStrapData implements CommandLineRunner {
     }
 
 
-    if(outsourcedPartRepository.count() == 0) {
+    if(productRepository.count() == 0) {
       Product intelI3 = new Product("Intel-i3", 199.99, 25);
       Product intelI5 = new Product("Intel-i5", 299.99, 25);
       Product intelI7 = new Product("Intel-i7", 399.99, 25);
@@ -119,7 +119,7 @@ public class BootStrapData implements CommandLineRunner {
     } 
 
 
-    if(productRepository.count() == 0) {
+    if(outsourcedPartRepository.count() == 0) {
         OutsourcedPart ssd512GB = new OutsourcedPart();
             ssd512GB.setName("ssd512GB");
             ssd512GB.setPrice(39.99);

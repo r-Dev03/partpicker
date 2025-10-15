@@ -81,7 +81,7 @@ public String about() {
     }
 
 
-    if(outsourcedPartRepository.count() == 0) {
+    if(productRepository.count() == 0) {
       Product intelI3 = new Product("Intel-i3", 199.99, 25);
       Product intelI5 = new Product("Intel-i5", 299.99, 25);
       Product intelI7 = new Product("Intel-i7", 399.99, 25);
@@ -96,7 +96,7 @@ public String about() {
     } 
 
 
-    if(productRepository.count() == 0) {
+    if(outsourcedPartRepository.count() == 0) {
         OutsourcedPart ssd512GB = new OutsourcedPart();
             ssd512GB.setName("ssd512GB");
             ssd512GB.setPrice(39.99);
@@ -136,9 +136,85 @@ public String about() {
 ```
 
 ## F. Add a “Buy Now” button to your product list. Your “Buy Now” button must meet each of the following parameters:
-- [] The “Buy Now” button must be next to the buttons that update and delete products.
-- [] The button should decrement the inventory of that product by one. It should not affect the inventory of any of the associated parts.
-- [] Display a message that indicates the success or failure of a purchase.
+- [x] The “Buy Now” button must be next to the buttons that update and delete products.
+- [x] The button should decrement the inventory of that product by one. It should not affect the inventory of any of the associated parts.
+- [x] Display a message that indicates the success or failure of a purchase.
+
+### confirmationbuyproduct.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Purchase Confirmation</title>
+  </head>
+  <body>
+    <h1>Your Order Has Been Confirmed! We Hope you Enjoy!</h1>
+    <a href="/">Link to Main Screen</a>
+  </body>
+</html>
+```
+
+### errorbuyproduct.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Error purchasing product.</title>
+  </head>
+  <body>
+    <h1>Oops! We ran into an issue processing your order. Please make sure everything looks right in your inventory</h1>
+    <a href="/">Link to Main Screen</a>
+  </body>
+</html>
+```
+
+### mainscreen.html - Lines 85-86
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Error purchasing product.</title>
+  </head>
+  <body>
+    <h1>Oops! We ran into an issue processing your order. Please make sure everything looks right in your inventory</h1>
+    <a href="/">Link to Main Screen</a>
+  </body>
+</html>
+```
+
+### Product.java - Lines 108-115
+```java
+  public boolean buyProduct() {
+    if (this.inv >= 1 ) {
+      this.inv--;
+      return true;
+    } else {
+      return false;
+    }
+  }
+```
+
+
+### AddProductController.java - Lines 177-190
+```java
+  @GetMapping("/buyproduct")
+  public String buyProduct(@RequestParam("productID") int pId, Model pModel) {
+    ProductService productService = context.getBean(ProductServiceImpl.class);
+    Product product2 = productService.findById(pId);
+
+    boolean purchaseConfirmation = product2.buyProduct();
+    if ( purchaseConfirmation ) {
+      productService.save(product2);
+      return "confirmationbuyproduct";
+    }
+
+    return "errorbuyproduct";
+  }
+}
+```
 
 ## G. Modify the parts to track maximum and minimum inventory by doing the following:
 - [] Add additional fields to the part entity for maximum and minimum inventory.
