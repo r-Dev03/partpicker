@@ -105,17 +105,17 @@ public class BootStrapData implements CommandLineRunner {
 
 
     if(productRepository.count() == 0) {
-      Product intelI3 = new Product("Intel-i3", 199.99, 25);
-      Product intelI5 = new Product("Intel-i5", 299.99, 25);
-      Product intelI7 = new Product("Intel-i7", 399.99, 25);
-      Product intelI9 = new Product("Intel-i9", 499.99, 25);
-      Product intelI12 = new Product("Intel-i12", 599.99, 25);
+      Product sf400 = new Product("SF400", 199.99, 25);
+      Product sf600 = new Product("SF600", 299.99, 25);
+      Product sf800 = new Product("SF800", 399.99, 25);
+      Product sf1000 = new Product("SF1000", 499.99, 25);
+      Product sf2000 = new Product("SF2000", 599.99, 25);
 
-      productRepository.save(intelI3);
-      productRepository.save(intelI5);
-      productRepository.save(intelI7);
-      productRepository.save(intelI9);
-      productRepository.save(intelI12);
+      productRepository.save(sf400);
+      productRepository.save(sf600);
+      productRepository.save(sf800);
+      productRepository.save(sf1000);
+      productRepository.save(sf2000);
     } 
 
 
