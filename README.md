@@ -172,17 +172,8 @@ public String about() {
 
 ### mainscreen.html - Lines 85-86
 ```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Error purchasing product.</title>
-  </head>
-  <body>
-    <h1>Oops! We ran into an issue processing your order. Please make sure everything looks right in your inventory</h1>
-    <a href="/">Link to Main Screen</a>
-  </body>
-</html>
+<a th:href="@{/buyproduct(productID=${tempProduct.id})}" class="btn btn-primary btn-sm mb-3"
+    onclick="if(!(confirm('Are you sure you want to purchase this product?')))return false">Buy Now</a>
 ```
 
 ### Product.java - Lines 108-115
