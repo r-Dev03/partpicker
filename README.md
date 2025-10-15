@@ -219,7 +219,7 @@ public String about() {
 <td th:text="${tempPart.maximum}">1</td>
 ```
 
-### - [x] Modify the sample inventory to include the maximum and minimum fields.
+- [x] Modify the sample inventory to include the maximum and minimum fields.
 
 ### Part.java - Lines 37-39 & 97-101
 ```java 
@@ -234,7 +234,7 @@ public String about() {
         public int getMaximum() { return this.maximum; }
 ```
 
-### - [x] Add to the InhousePartForm and OutsourcedPartForm forms additional text inputs for the inventory so the user can set the maximum and minimum values.
+- [x] Add to the InhousePartForm and OutsourcedPartForm forms additional text inputs for the inventory so the user can set the maximum and minimum values.
 
 ### InhousePartForm.html - Lines 24 - 35
 ```html
@@ -261,7 +261,7 @@ public String about() {
 <p th:if="${#fields.hasErrors('inv')}" th:errors="*{inv}">Inventory Error</p>
 ```
 
-### - [x] Rename the file the persistent storage is saved to.
+- [x] Rename the file the persistent storage is saved to.
 
 ### application.properties - Line 6
 ```jproperties 
