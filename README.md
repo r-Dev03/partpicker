@@ -419,5 +419,4 @@ public @interface ValidPartInventory {
     }
 ```
 ## J. Remove the class files for any unused validators in order to clean your code.
-
-## K.  Demonstrate professional communication in the content and presentation of your submission.
+- All validators being used.
