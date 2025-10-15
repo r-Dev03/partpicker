@@ -208,11 +208,84 @@ public String about() {
 ```
 
 ## G. Modify the parts to track maximum and minimum inventory by doing the following:
-- [] Add additional fields to the part entity for maximum and minimum inventory.
-- [] Modify the sample inventory to include the maximum and minimum fields.
-- [] Add to the InhousePartForm and OutsourcedPartForm forms additional text inputs for the inventory so the user can set the maximum and minimum values.
-- [] Rename the file the persistent storage is saved to.
-- [] Modify the code to enforce that the inventory is between or at the minimum and maximum value.
+- [x] Add additional fields to the part entity for maximum and minimum inventory.
+
+### mainscreen.html - Lines 38-39 & Lines 48-49
+```html
+<th>Minimum</th>
+<th>Maximum</th>
+
+<td th:text="${tempPart.minimum}">1</td>
+<td th:text="${tempPart.maximum}">1</td>
+```
+
+### - [x] Modify the sample inventory to include the maximum and minimum fields.
+
+### Part.java - Lines 37-39 & 97-101
+```java 
+    @Min (value = 0, message = "Minimum inventory must be > 0")
+        int minimum;
+        int maximum;
+
+        public void setMinimum(int minimum) { this.minimum = minimum; }
+        public int getMinimum() { return this.minimum; }
+         
+        public void setMaximum(int maximum) { this.maximum = maximum; }
+        public int getMaximum() { return this.maximum; }
+```
+
+### - [x] Add to the InhousePartForm and OutsourcedPartForm forms additional text inputs for the inventory so the user can set the maximum and minimum values.
+
+### InhousePartForm.html - Lines 24 - 35
+```html
+<p><input type="text" th:field="*{partId}" placeholder="Part ID" class="form-control mb-4 col-4"/></p>
+
+<p><input type="text" th:field="*{minimum}" placeholder="Minimum" class="form-control mb-4 col-4"/></p>
+
+<p><input type="text" th:field="*{maximum}" placeholder="Maximum" class="form-control mb-4 col-4"/></p>
+
+<p><input type="text" th:field="*{partId}" placeholder="Part ID" class="form-control mb-4 col-4"/></p>
+
+<p>
+<div th:if="${#fields.hasAnyErrors()}">
+    <ul><li th:each="err: ${#fields.allErrors()}" th:text="${err}"></li></ul>
+</div>
+```
+
+### OutsourcedPartForm.html - Lines 25-29
+```html
+<p><input type="text" th:field="*{minimum}" placeholder="Minimum" class="form-control mb-4 col-4"/></p>
+<p th:if="${#fields.hasErrors('inv')}" th:errors="*{inv}">Inventory Error</p>
+
+<p><input type="text" th:field="*{maximum}" placeholder="Maximum" class="form-control mb-4 col-4"/></p>
+<p th:if="${#fields.hasErrors('inv')}" th:errors="*{inv}">Inventory Error</p>
+```
+
+### - [x] Rename the file the persistent storage is saved to.
+
+### application.properties - Line 6
+```jproperties 
+ spring.datasource.url=jdbc:h2:file:~/src/main/resources/spring-boot-h2-db102
+```
+### - [x] Modify the code to enforce that the inventory is between or at the minimum and maximum value.
+
+### Part.java - Lines 89-95
+```java
+    public void validateLimits() {
+      if (this.inv < this.minimum) {
+        this.inv = this.minimum;
+      } else if (this.inv > this.maximum ) {
+          this.inv = this.maximum;
+      }
+    }
+```
+
+### InhousePartServiceImpl.java & OutSourcedPartServiceImpl.java - Line 52
+```java
+ thePart.validateLimits();
+```
+
+
 
 ## H. Add validation for between or at the maximum and minimum fields. The validation must include the following:
 -[] Display error messages for low inventory when adding and updating parts if the inventory is less than the minimum number of parts.

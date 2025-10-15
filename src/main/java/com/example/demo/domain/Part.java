@@ -34,6 +34,10 @@ public abstract class Part implements Serializable {
             inverseJoinColumns=@JoinColumn(name="product_id"))
     Set<Product> products= new HashSet<>();
 
+  @Min (value = 0, message = "Minimum inventory must be > 0")
+  int minimum;
+  int maximum;
+
     public Part() {
     }
 
@@ -82,6 +86,14 @@ public abstract class Part implements Serializable {
         this.inv = inv;
     }
 
+    public void validateLimits() {
+      if (this.inv < this.minimum) {
+        this.inv = this.minimum;
+      } else if (this.inv > this.maximum ) {
+          this.inv = this.maximum;
+      }
+    }
+
     public Set<Product> getProducts() {
         return products;
     }
@@ -89,6 +101,12 @@ public abstract class Part implements Serializable {
     public void setProducts(Set<Product> products) {
         this.products = products;
     }
+
+    public void setMinimum(int minimum) { this.minimum = minimum; }
+    public int getMinimum() { return this.minimum; }
+
+    public void setMaximum(int maximum) { this.maximum = maximum; }
+    public int getMaximum() { return this.maximum; }
 
     public String toString(){
         return this.name;
