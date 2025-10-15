@@ -140,7 +140,7 @@ public String about() {
 - [x] The button should decrement the inventory of that product by one. It should not affect the inventory of any of the associated parts.
 - [x] Display a message that indicates the success or failure of a purchase.
 
-### confirmationbuyproduct.html
+### confirmationbuyproduct.html - created
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -155,7 +155,7 @@ public String about() {
 </html>
 ```
 
-### errorbuyproduct.html
+### errorbuyproduct.html - created
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -296,7 +296,7 @@ public String about() {
 @ValidPartInventoryMinimum
 ```
 
-### PartInventoryMinimumValidator.java
+### PartInventoryMinimumValidator.java - created
 ```java
 package com.example.demo.validators;
 
@@ -325,7 +325,7 @@ public class PartInventoryMinimumValidator implements ConstraintValidator<ValidP
 }
 ```
 
-### ValidPartInventoryMinimum.java
+### ValidPartInventoryMinimum.java - created
 ```java
 package com.example.demo.validators;
 
@@ -347,7 +347,7 @@ public @interface ValidPartInventoryMinimum {
 ```
 
 - [x] Display error messages when adding and updating parts if the inventory is greater than the maximum.
-### PartInventoryValidator.java
+### PartInventoryValidator.java - created
 
 ```java
 package com.example.demo.validators;
@@ -377,7 +377,7 @@ public class PartInventoryValidator implements ConstraintValidator<ValidPartInve
 }
 ```
 
-### ValidPartInventory.java 
+### ValidPartInventory.java - created
 ```java
 package com.example.demo.validators;
 
@@ -399,6 +399,7 @@ public @interface ValidPartInventory {
 ```
 
 ## I. Add at least two unit tests for the maximum and minimum fields to the PartTest class in the test package. 
+### PartTest.java - Lines 159-176
 ```java
   @Test
     void getMinimum() {
