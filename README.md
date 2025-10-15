@@ -267,7 +267,7 @@ public String about() {
 ```jproperties 
  spring.datasource.url=jdbc:h2:file:~/src/main/resources/spring-boot-h2-db102
 ```
-### - [x] Modify the code to enforce that the inventory is between or at the minimum and maximum value.
+- [x] Modify the code to enforce that the inventory is between or at the minimum and maximum value.
 
 ### Part.java - Lines 89-95
 ```java
