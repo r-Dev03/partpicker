@@ -289,6 +289,7 @@ public String about() {
 
 ## H. Add validation for between or at the maximum and minimum fields. The validation must include the following:
 -[x] Display error messages for low inventory when adding and updating parts if the inventory is less than the minimum number of parts.
+
 -[x] Display error messages for low inventory when adding and updating products lowers the part inventory below the minimum.
 ### Part.java - Lines 21-22 
 ```java
