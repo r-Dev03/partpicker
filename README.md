@@ -399,7 +399,25 @@ public @interface ValidPartInventory {
 ```
 
 ## I. Add at least two unit tests for the maximum and minimum fields to the PartTest class in the test package. 
+```java
+  @Test
+    void getMinimum() {
+        int minimum=5;
+        partIn.setMinimum(minimum);
+        assertEquals(minimum, partIn.getMinimum());
+        partOut.setMinimum(minimum);
+        assertEquals(minimum, partOut.getMinimum());
+    }
 
+    @Test
+    void getMaximum() {
+        int maximum=5;
+        partIn.setMaximum(maximum);
+        assertEquals(maximum, partIn.getMaximum());
+        partOut.setMaximum(maximum);
+        assertEquals(maximum, partOut.getMaximum());
+    }
+```
 ## J. Remove the class files for any unused validators in order to clean your code.
 
 ## K.  Demonstrate professional communication in the content and presentation of your submission.
