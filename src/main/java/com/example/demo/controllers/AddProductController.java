@@ -179,12 +179,23 @@ public class AddProductController {
     ProductService productService = context.getBean(ProductServiceImpl.class);
     Product product2 = productService.findById(pId);
 
-    boolean purchaseConfirmation = product2.buyProduct();
-    if ( purchaseConfirmation ) {
-      productService.save(product2);
-      return "confirmationbuyproduct";
-    }
+    try {
+      boolean purchaseConfirmation = product2.buyProduct();
+      if (purchaseConfirmation) {
+        productService.save(product2);
+        return "confirmationbuyproduct";
+      }
 
-    return "errorbuyproduct";
+      pModel.addAttribute("errorMessage",
+        "Purchase failed: One or more parts do not have enough inventory to complete the order.");
+      return "errorbuyproduct";
+    } catch (javax.validation.ConstraintViolationException e) {
+      pModel.addAttribute("errorMessage", 
+        "Purchase failed: A part’s inventory cannot be lower than its required minimum.");
+      return "errorbuyproduct";
+    } catch (Exception e) {
+      pModel.addAttribute("errorMessage", "An unexpected error occurred while processing the purchase.");
+      return "errorbuyproduct";
+    }
   }
 }

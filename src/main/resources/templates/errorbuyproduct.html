@@ -1,12 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
     <meta charset="UTF-8">
-    <title>Error purchasing product.</title>
-  </head>
-  <body>
-    <h1>Oops! We ran into an issue processing your order. Please make sure everything looks right in your inventory</h1>
-    <a href="/">Link to Main Screen</a>
-  </body>
+    <title>Buy Product Error</title>
+</head>
+<body>
+    <h1>Buy Product Error</h1>
+
+    <p th:text="${errorMessage}">An error occurred while processing your request.</p>
+
+    <div class="error-details">
+        <p>
+            The product could not be purchased because one or more associated parts
+            would have a lower inventory than their minimum allowed level.
+        </p>
+        <p>
+            Please restock the parts or adjust the product’s components before trying again.
+        </p>
+    </div>
+
+    <a th:href="@{/}">Return to Main Menu</a>
+</body>
 </html>
 

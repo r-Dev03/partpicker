@@ -5,8 +5,9 @@
 ## C. Customize the HTML user interface for your customer’s application. The user interface should include the shop name, the product names, and the names of the parts.
 ### mainscreen.html - Lines 14 & 19
 ```html 
-    <title>Spiffy Computer Parts</title>
-    <h1>Computer Parts</h1>
+    <title>RigSmiths</title>
+    <h1>RigSmiths</h1>
+    <h2>Pre-Built Computers</h2> 
 ```
 
 ## D. Add an “About” page to the application to describe your chosen customer’s company to web viewers and include navigation to and from the “About” page and the main screen.
@@ -20,7 +21,7 @@
   </head>
   <body>
     <p>
-      Spiffy Computer Parts is your one stop shop to building or customizing the perfect rig! Profits are an afterthought, first comes first, getting you a good deal!
+      RigSmiths is your one stop shop to building or customizing the perfect rig! Profits are an afterthought, first comes first, getting you a good deal!
     </p>
     <a href="/">Link to Main Screen</a>
   </body>
@@ -176,11 +177,19 @@ public String about() {
 ### Product.java - Lines 108-115
 ```java
   public boolean buyProduct() {
-    if (this.inv >= 1 ) {
+    if (this.inv >= 1) {
       this.inv--;
-      return true;
+
+      for (Part part : this.getParts()) {
+        if (part.getInv() >= 1) {
+          part.setInv(part.getInv() - 1);
+        } else {
+          return false; 
+        }
+      }
+      return true; 
     } else {
-      return false;
+      return false; 
     }
   }
 ```
@@ -193,15 +202,25 @@ public String about() {
     ProductService productService = context.getBean(ProductServiceImpl.class);
     Product product2 = productService.findById(pId);
 
-    boolean purchaseConfirmation = product2.buyProduct();
-    if ( purchaseConfirmation ) {
-      productService.save(product2);
-      return "confirmationbuyproduct";
-    }
+    try {
+      boolean purchaseConfirmation = product2.buyProduct();
+      if (purchaseConfirmation) {
+        productService.save(product2);
+        return "confirmationbuyproduct";
+      }
 
-    return "errorbuyproduct";
+      pModel.addAttribute("errorMessage",
+        "Purchase failed: One or more parts do not have enough inventory to complete the order.");
+      return "errorbuyproduct";
+    } catch (javax.validation.ConstraintViolationException e) {
+      pModel.addAttribute("errorMessage", 
+        "Purchase failed: A part’s inventory cannot be lower than its required minimum.");
+      return "errorbuyproduct";
+    } catch (Exception e) {
+      pModel.addAttribute("errorMessage", "An unexpected error occurred while processing the purchase.");
+      return "errorbuyproduct";
+    }
   }
-}
 ```
 
 ## G. Modify the parts to track maximum and minimum inventory by doing the following:
@@ -256,6 +275,13 @@ public String about() {
 
 <p><input type="text" th:field="*{maximum}" placeholder="Maximum" class="form-control mb-4 col-4"/></p>
 <p th:if="${#fields.hasErrors('inv')}" th:errors="*{inv}">Inventory Error</p>
+
+<div th:if="${#fields.hasAnyErrors()}">
+    <ul>
+        <li th:each="err : ${#fields.allErrors()}" th:text="${err}"></li>
+    </ul>
+ </div>
+
 ```
 
 - [x] Rename the file the persistent storage is saved to.

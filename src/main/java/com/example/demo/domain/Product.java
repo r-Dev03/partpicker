@@ -106,11 +106,20 @@ public class Product implements Serializable {
     }
 
   public boolean buyProduct() {
-    if (this.inv >= 1 ) {
+    if (this.inv >= 1) {
       this.inv--;
-      return true;
+
+      for (Part part : this.getParts()) {
+        if (part.getInv() >= 1) {
+          part.setInv(part.getInv() - 1);
+        } else {
+          return false; 
+        }
+      }
+      return true; 
     } else {
-      return false;
+      return false; 
     }
   }
+
 }
