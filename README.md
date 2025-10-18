@@ -443,4 +443,17 @@ public @interface ValidPartInventory {
     }
 ```
 ## J. Remove the class files for any unused validators in order to clean your code.
-- All validators being used.
+```
+References to each validator:
+    ValidDeletePart (DeletePartValidator) - Used in Part.java 
+
+    ValidEnufParts (EnufPartsValidator) - Used in Product.java
+
+    ValidPartInventory (PartInventoryValidator) - Used in Part.java
+
+    ValidPartInventoryMinimum (PartInventoryMinimumValidator) - Used in Part.java
+
+    ValidProductPrice (PriceProductValidator) - Used in Product.java
+
+All 5 validators in the project are being used.
+```
