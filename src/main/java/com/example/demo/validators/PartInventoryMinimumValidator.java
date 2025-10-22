@@ -20,6 +20,6 @@ public class PartInventoryMinimumValidator implements ConstraintValidator<ValidP
 
     @Override
     public boolean isValid(Part part, ConstraintValidatorContext constraintValidatorContext) {
-        return part.getInv() > part.getMinimum();
+        return part.getInv() >= part.getMinimum();
     }
 }

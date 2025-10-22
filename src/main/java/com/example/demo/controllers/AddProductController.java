@@ -48,50 +48,89 @@ public class AddProductController {
         return "productForm";
     }
 
-    @PostMapping("/showFormAddProduct")
-    public String submitForm(@Valid @ModelAttribute("product") Product product, BindingResult bindingResult, Model theModel) {
-        theModel.addAttribute("product", product);
+  @PostMapping("/showFormAddProduct")
+  public String submitForm(@Valid @ModelAttribute("product") Product product,
+    BindingResult bindingResult, Model theModel) {
 
-        if(bindingResult.hasErrors()){
-            ProductService productService = context.getBean(ProductServiceImpl.class);
-            Product product2 = new Product();
-            try {
-                product2 = productService.findById((int) product.getId());
-            } catch (Exception e) {
-                System.out.println("Error Message " + e.getMessage());
-            }
-            theModel.addAttribute("parts", partService.findAll());
-            List<Part>availParts=new ArrayList<>();
-            for(Part p: partService.findAll()){
-                if(!product2.getParts().contains(p))availParts.add(p);
-            }
-            theModel.addAttribute("availparts",availParts);
-            theModel.addAttribute("assparts",product2.getParts());
-            return "productForm";
+    theModel.addAttribute("product", product);
+
+    ProductService productService = context.getBean(ProductServiceImpl.class);
+
+    if (bindingResult.hasErrors()) {
+      Product product2 = new Product();
+      try {
+        if (product.getId() != 0) {
+          product2 = productService.findById((int) product.getId());
         }
- //       theModel.addAttribute("assparts", assparts);
- //       this.product=product;
-//        product.getParts().addAll(assparts);
-        else {
-            ProductService repo = context.getBean(ProductServiceImpl.class);
-            if(product.getId()!=0) {
-                Product product2 = repo.findById((int) product.getId());
-                PartService partService1 = context.getBean(PartServiceImpl.class);
-                if(product.getInv()- product2.getInv()>0) {
-                    for (Part p : product2.getParts()) {
-                        int inv = p.getInv();
-                        p.setInv(inv - (product.getInv() - product2.getInv()));
-                        partService1.save(p);
-                    }
-                }
-            }
-            else{
-                product.setInv(0);
-            }
-            repo.save(product);
-            return "confirmationaddproduct";
-        }
+      } catch (Exception e) {
+        System.out.println("Error fetching product: " + e.getMessage());
+      }
+
+      theModel.addAttribute("parts", partService.findAll());
+
+      List<Part> availParts = new ArrayList<>();
+      for (Part p : partService.findAll()) {
+        if (!product2.getParts().contains(p)) availParts.add(p);
+      }
+      theModel.addAttribute("availparts", availParts);
+      theModel.addAttribute("assparts", product2.getParts());
+
+      return "productForm";
     }
+
+    try {
+      if (product.getId() != 0) { 
+        Product existingProduct = productService.findById((int) product.getId());
+        PartService partService1 = context.getBean(PartServiceImpl.class);
+
+        int invDiff = product.getInv() - existingProduct.getInv(); 
+
+        if (invDiff > 0) { 
+          for (Part p : existingProduct.getParts()) {
+            int newInv = p.getInv() - invDiff;
+            if (newInv < p.getMinimum()) {
+              bindingResult.rejectValue("inv", null,
+                "Cannot decrease part inventory: part '" + p.getName() + "' would go below minimum.");
+              List<Part> availParts = new ArrayList<>();
+              for (Part part : partService.findAll()) {
+                if (!existingProduct.getParts().contains(part)) availParts.add(part);
+              }
+              theModel.addAttribute("availparts", availParts);
+              theModel.addAttribute("assparts", existingProduct.getParts());
+              return "productForm";
+            }
+            p.setInv(newInv);
+            partService1.save(p);
+          }
+        }
+      } else { 
+        product.setInv(0);
+      }
+
+      productService.save(product);
+      return "confirmationaddproduct";
+
+    } catch (javax.validation.ConstraintViolationException e) {
+      for (var violation : e.getConstraintViolations()) {
+        bindingResult.rejectValue(
+          violation.getPropertyPath().toString(),
+          null,
+          violation.getMessage()
+        );
+      }
+
+      Product product2 = productService.findById((int) product.getId());
+      List<Part> availParts = new ArrayList<>();
+      for (Part p : partService.findAll()) {
+        if (!product2.getParts().contains(p)) availParts.add(p);
+      }
+      theModel.addAttribute("availparts", availParts);
+      theModel.addAttribute("assparts", product2.getParts());
+
+      return "productForm";
+    }
+  }
+
 
     @GetMapping("/showProductFormForUpdate")
     public String showProductFormForUpdate(@RequestParam("productID") int theId, Model theModel) {

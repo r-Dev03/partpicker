@@ -30,7 +30,7 @@ public abstract class Part implements Serializable {
     String name;
     @Min(value = 0, message = "Price value must be positive")
     double price;
-    @Min(value = 0, message = "Inventory value must be positive")
+    @Min(value = 1, message = "Inventory value must be positive")
     int inv;
 
     @ManyToMany
@@ -38,7 +38,7 @@ public abstract class Part implements Serializable {
             inverseJoinColumns=@JoinColumn(name="product_id"))
     Set<Product> products= new HashSet<>();
 
-  @Min (value = 0, message = "Minimum inventory must be > 0")
+  @Min (value = 1, message = "Minimum inventory must be > 0")
   int minimum;
   int maximum;
 
