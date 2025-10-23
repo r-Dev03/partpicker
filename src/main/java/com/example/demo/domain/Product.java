@@ -105,22 +105,6 @@ public class Product implements Serializable {
         return (int) (id ^ (id >>> 32));
     }
 
-  // public boolean buyProduct() {
-  //   if (this.inv <= 1) {
-  //     this.inv--;
-  //
-  //     for (Part part : this.getParts()) {
-  //       if (part.getInv() >= 1 && (part.getInv()) - 1 >= part.getMinimum()){
-  //         part.setInv(part.getInv() - 1);
-  //       } else {
-  //         return false; 
-  //       }
-  //     }
-  //     return true; 
-  //   } else {
-  //     return false; 
-  //   }
-  // }
   public boolean buyProduct() {
     if (this.inv <= 1) {
         return false; 
