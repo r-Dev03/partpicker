@@ -36,4 +36,5 @@ build/
 ### Nix ### 
 .envrc
 .direnv
+flake.nix
 flake.lock

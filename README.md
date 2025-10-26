@@ -442,5 +442,5 @@ References to each validator:
 
     ValidProductPrice (PriceProductValidator) - Used in Product.java
 
-All 5 validators in the project are being used.
+DeletePartValidator has been removed.
 ```
