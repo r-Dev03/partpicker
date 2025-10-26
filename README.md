@@ -94,43 +94,7 @@ public String about() {
     } 
 
 
-    if(outsourcedPartRepository.count() == 0) {
-        OutsourcedPart ssd512GB = new OutsourcedPart();
-            ssd512GB.setName("ssd512GB");
-            ssd512GB.setPrice(39.99);
-            ssd512GB.setInv(10);
-            ssd512GB.setCompanyName("Samsung");
-
-            OutsourcedPart ssd1TB = new OutsourcedPart();
-            ssd1TB.setName("ssd1TB");
-            ssd1TB.setPrice(49.99);
-            ssd1TB.setInv(10);
-            ssd1TB.setCompanyName("Samsung");
-
-            OutsourcedPart ssd2TB = new OutsourcedPart();
-            ssd2TB.setName("ssd2TB");
-            ssd2TB.setPrice(59.99);
-            ssd2TB.setInv(10);
-            ssd2TB.setCompanyName("Samsung");
-
-            OutsourcedPart ssd3TB = new OutsourcedPart();
-            ssd3TB.setName("ssd3TB");
-            ssd3TB.setPrice(69.99);
-            ssd3TB.setInv(10);
-            ssd3TB.setCompanyName("Samsung");
-
-            OutsourcedPart ssd4TB = new OutsourcedPart();
-            ssd4TB.setName("ssd4TB");
-            ssd4TB.setPrice(59.99);
-            ssd4TB.setInv(10);
-            ssd4TB.setCompanyName("Samsung");
-
-            outsourcedPartRepository.save(ssd512GB);
-            outsourcedPartRepository.save(ssd1TB);
-            outsourcedPartRepository.save(ssd2TB);
-            outsourcedPartRepository.save(ssd3TB);
-            outsourcedPartRepository.save(ssd4TB);
-
+    Revision 2: Removing outsourced parts:
 ```
 
 ## F. Add a “Buy Now” button to your product list. Your “Buy Now” button must meet each of the following parameters:
@@ -192,11 +156,36 @@ public String about() {
       return false; 
     }
   }
+
+
+  Revision 2: Modified buyProduct() function: 
+
+    public boolean buyProduct() {
+    if (this.inv <= 1) {
+        return false; 
+    }
+
+    for (Part part : this.getParts()) {
+        if (part.getInv() <= part.getMinimum()) {
+            return false; 
+        }
+    }
+
+    this.inv--;
+
+    for (Part part : this.getParts()) {
+        part.setInv(part.getInv() - 1);
+    }
+
+    return true;
+}
 ```
 
 
 ### AddProductController.java - Lines 177-190
 ```java
+  Revision 2: Wrapped in a try catch to prevent hibernation error:
+
   @GetMapping("/buyproduct")
   public String buyProduct(@RequestParam("productID") int pId, Model pModel) {
     ProductService productService = context.getBean(ProductServiceImpl.class);
