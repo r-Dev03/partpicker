@@ -132,7 +132,7 @@ spring.h2.console.enabled=true
 spring.h2.console.path=/h2-console
 
 # Database (file-based persistence)
-spring.datasource.url=jdbc:h2:file:~/rigsmith-computer-012546575
+spring.datasource.url=jdbc:h2:file:~/partpicker
 spring.datasource.username=sa
 spring.datasource.password=
 spring.datasource.driverClassName=org.h2.Driver
@@ -149,7 +149,7 @@ View and query the database directly through the web console:
 1. Start the application: `mvn spring-boot:run`
 2. Navigate to: `http://localhost:8080/h2-console`
 3. Enter connection details:
-   - **JDBC URL:** `jdbc:h2:file:~/rigsmith-computer-012546575`
+   - **JDBC URL:** `jdbc:h2:file:~/partpicker`
    - **Username:** `sa`
    - **Password:** (leave blank)
 4. Click "Connect"
@@ -160,20 +160,7 @@ SELECT * FROM part;
 SELECT * FROM product;
 ```
 
-### Customizing Database Name
-
-For a cleaner portfolio presentation, consider renaming the database file:
-
-**Change in `application.properties`:**
-```properties
-# From:
-spring.datasource.url=jdbc:h2:file:~/rigsmith-computer-012546575
-
-# To:
-spring.datasource.url=jdbc:h2:file:~/partpicker
-```
-
-This will create a new database file called `partpicker.mv.db` in your home directory.
+**Note:** The database file will be created as `partpicker.mv.db` in your home directory.
 
 ## Usage
 
@@ -471,7 +458,7 @@ The Nix environment provides consistent development dependencies across differen
 ## Common Issues
 
 **Issue: Sample data loads on every restart**
-- Solution: Sample data is conditional - only loads when DB is empty. If you want fresh data, delete the H2 database file (`~/rigsmith-computer-012546575.mv.db`)
+- Solution: Sample data is conditional - only loads when DB is empty. If you want fresh data, delete the H2 database file (`~/partpicker.mv.db`)
 
 **Issue: Validation errors not displaying**
 - Solution: Check `@Valid` annotation on controller method parameters and `th:errors` in Thymeleaf templates
@@ -480,7 +467,7 @@ The Nix environment provides consistent development dependencies across differen
 - Solution: Verify `productRepository.save()` is called after inventory update
 
 **Issue: H2 Console won't connect**
-- Solution: Verify JDBC URL matches `application.properties`: `jdbc:h2:file:~/rigsmith-computer-012546575`
+- Solution: Verify JDBC URL matches `application.properties`: `jdbc:h2:file:~/partpicker`
 
 **Issue: Port 8080 already in use**
 - Solution: Kill the process using port 8080 or run on different port:
