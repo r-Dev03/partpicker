@@ -167,7 +167,7 @@ SELECT * FROM product;
 ### Main Inventory Screen
 
 The main screen displays:
-- **Parts List:** All CPUs, GPUs, RAM, storage, etc.
+- **Parts List:** Computer parts inventory
 - **Products List:** Complete PC builds
 - Actions: Add, Update, Delete for both parts and products
 
@@ -331,8 +331,8 @@ public class BootStrapData implements CommandLineRunner {
 ```
 
 **Sample Data:**
-- 5 computer parts (CPUs, GPUs, RAM, storage, cases)
-- 5 complete PC builds (gaming rigs, workstations, budget builds)
+- 5 RAM modules (4GB, 8GB, 16GB, 32GB, 64GB)
+- 1 pre-built computer system
 - Only loads when database is empty to prevent duplicates
 
 ## Testing
