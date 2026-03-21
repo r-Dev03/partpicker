@@ -109,7 +109,7 @@ java -version
 ### Setup
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/partpicker.git
+git clone https://github.com/r-Dev03/partpicker.git
 cd partpicker
 
 # Build with Maven
@@ -200,33 +200,12 @@ The main screen displays:
 1. Click "Buy Now" next to any product
 2. System validates:
    - Product inventory > 0
-   - Decrements product inventory by 1
-   - Does NOT affect associated parts inventory
-3. Displays success/failure message
+   - Part inventory levels meet minimum thresholds
+3. Displays confirmation or error page with specific error messages
 
 ### About Page
 
 Navigate to "About" to view company information and navigation back to main screen.
-
-## Sample Inventory
-
-The application auto-loads sample data on first run:
-
-**Parts:**
-- Intel Core i9-13900K (CPU) - In-House
-- NVIDIA RTX 4090 (GPU) - Outsourced
-- Corsair Vengeance 32GB DDR5 (RAM) - Outsourced
-- Samsung 980 Pro 2TB NVMe (Storage) - In-House
-- NZXT H510 Case (Case) - Outsourced
-
-**Products:**
-- Ultimate Gaming Rig
-- Content Creator Workstation
-- Budget Gaming Build
-- Office Productivity PC
-- Developer Workstation
-
-**Note:** Sample data only loads when both parts and products tables are empty (prevents duplicates on restart).
 
 ## Project Structure
 ```
@@ -270,7 +249,9 @@ partpicker/
     │       │   ├── about.html
     │       │   ├── InhousePartForm.html
     │       │   ├── OutsourcedPartForm.html
-    │       │   └── productForm.html
+    │       │   ├── productForm.html
+    │       │   ├── confirmationbuyproduct.html
+    │       │   └── errorbuyproduct.html
     │       └── application.properties
     └── test/
         └── java/
@@ -305,26 +286,36 @@ public class Part {
 
 ### Buy Now Functionality
 ```java
-@GetMapping("/buyProduct")
-public String buyProduct(@RequestParam("productID") int id, Model model) {
-    Product product = productService.findById(id);
-    
-    if (product.getInv() > 0) {
-        product.setInv(product.getInv() - 1);
-        productService.save(product);
-        model.addAttribute("message", "Purchase successful!");
-    } else {
-        model.addAttribute("error", "Product out of stock");
+@GetMapping("/buyproduct")
+public String buyProduct(@RequestParam("productID") int pId, Model pModel) {
+    ProductService productService = context.getBean(ProductServiceImpl.class);
+    Product product2 = productService.findById(pId);
+    try {
+        boolean purchaseConfirmation = product2.buyProduct();
+        if (purchaseConfirmation) {
+            productService.save(product2);
+            return "confirmationbuyproduct";
+        }
+        pModel.addAttribute("errorMessage",
+            "Purchase failed: One or more parts do not have enough inventory to complete the order.");
+        return "errorbuyproduct";
+    } catch (javax.validation.ConstraintViolationException e) {
+        pModel.addAttribute("errorMessage", 
+            "Purchase failed: A part's inventory cannot be lower than its required minimum.");
+        return "errorbuyproduct";
+    } catch (Exception e) {
+        pModel.addAttribute("errorMessage", "An unexpected error occurred while processing the purchase.");
+        return "errorbuyproduct";
     }
-    
-    return "mainscreen";
 }
 ```
 
 **Purchase Logic:**
-- Decrements product inventory only
-- Associated parts inventory unchanged (parts are reusable across products)
-- Returns user to main screen with status message
+- Calls `buyProduct()` method on Product entity
+- Validates inventory constraints before completing purchase
+- Returns confirmation page on success
+- Returns error page with specific error messages on failure
+- Handles validation exceptions for inventory minimum thresholds
 
 ### Sample Data Loading
 ```java
@@ -333,66 +324,25 @@ public class BootStrapData implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (partRepository.count() == 0 && productRepository.count() == 0) {
-            // Load 5 sample parts
-            // Load 5 sample products
+            // Load sample parts and products
         }
     }
 }
 ```
 
-**Conditional Loading:**
-- Only runs when database is empty
-- Prevents duplicate data on application restart
-- Uses H2 file-based persistence
+**Sample Data:**
+- 5 computer parts (CPUs, GPUs, RAM, storage, cases)
+- 5 complete PC builds (gaming rigs, workstations, budget builds)
+- Only loads when database is empty to prevent duplicates
 
 ## Testing
 
-### Unit Tests
-
-Located in `src/test/java/com/example/demo/domain/PartTest.java`:
-```java
-@Test
-public void testMinInventoryValidation() {
-    Part part = new InhousePart();
-    part.setInv(5);
-    part.setMinInv(10);
-    part.setMaxInv(100);
-    
-    // Should fail validation (inv < minInv)
-    assertFalse(validatePart(part));
-}
-
-@Test
-public void testMaxInventoryValidation() {
-    Part part = new InhousePart();
-    part.setInv(150);
-    part.setMinInv(10);
-    part.setMaxInv(100);
-    
-    // Should fail validation (inv > maxInv)
-    assertFalse(validatePart(part));
-}
-```
+The project includes unit tests for the Part entity covering basic getter/setter functionality, object equality, and toString implementations.
 
 **Run tests:**
 ```bash
 mvn test
 ```
-
-## Customizations Made
-
-This project was customized from a generic template:
-
-1. **Branding:** Changed shop name to "PartPicker - PC Components & Systems"
-2. **Product Names:** Gaming PCs, workstations, etc. (computer-specific)
-3. **Part Names:** CPUs, GPUs, RAM, storage, cases
-4. **About Page:** Added company description and navigation
-5. **Sample Data:** Computer parts inventory (5 parts, 5 products)
-6. **Buy Button:** Added purchase functionality to product list
-7. **Min/Max Fields:** Extended Part entity with inventory constraints
-8. **Validation:** Custom validator for min/max inventory enforcement
-9. **Unit Tests:** Added tests for inventory validation
-10. **Code Cleanup:** Removed unused validator classes
 
 ## Development Workflow
 
@@ -411,74 +361,17 @@ The Nix environment provides consistent development dependencies across differen
 
 ## Limitations
 
-**Current Constraints:**
 - No user authentication (single-user system)
 - No shopping cart (single-item purchases only)
 - Parts inventory not decremented on product sale (simplified model)
 - No supplier management beyond company name
 - No reporting or analytics
 - File-based H2 database (not production-ready for multi-user scenarios)
-
-**Design Simplifications:**
 - Products don't track which specific part instances they use
 - No multi-quantity purchases
 - No order history
 - No customer management
-- Basic error handling only
-
-## Future Enhancements
-
-**Core Features:**
-- Multi-item shopping cart
-- User authentication and roles (admin, customer)
-- Order history and tracking
-- Customer accounts
-- Parts inventory deduction on product sales
-
-**Inventory Management:**
-- Automatic reorder notifications at min threshold
-- Supplier integration
-- Price history tracking
-- Batch import/export (CSV)
-
-**Business Features:**
-- Sales analytics dashboard
-- Revenue tracking
-- Popular products/parts reports
-- Low stock alerts (email notifications)
-
-**Technical Improvements:**
-- PostgreSQL/MySQL for production
-- REST API layer
-- Frontend framework (React/Vue) instead of Thymeleaf
-- Comprehensive unit and integration tests
-- Docker containerization
-- CI/CD pipeline
-
-## Common Issues
-
-**Issue: Sample data loads on every restart**
-- Solution: Sample data is conditional - only loads when DB is empty. If you want fresh data, delete the H2 database file (`~/partpicker.mv.db`)
-
-**Issue: Validation errors not displaying**
-- Solution: Check `@Valid` annotation on controller method parameters and `th:errors` in Thymeleaf templates
-
-**Issue: Buy Now button doesn't decrement inventory**
-- Solution: Verify `productRepository.save()` is called after inventory update
-
-**Issue: H2 Console won't connect**
-- Solution: Verify JDBC URL matches `application.properties`: `jdbc:h2:file:~/partpicker`
-
-**Issue: Port 8080 already in use**
-- Solution: Kill the process using port 8080 or run on different port:
-```bash
-  mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
-```
 
 ## License
 
 MIT License - see LICENSE file for details
-
----
-
-*A Spring Boot MVC application demonstrating inventory management, form validation, and Thymeleaf templating for computer parts retail.*
