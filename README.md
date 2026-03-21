@@ -58,6 +58,7 @@ Computer parts retailers need to track both complete systems (gaming PCs, workst
 
 ### MVC Pattern
 ```
+
 ┌─────────────────────────────────┐
 │      Browser (Client)           │
 └────────────┬────────────────────┘
@@ -70,7 +71,7 @@ Computer parts retailers need to track both complete systems (gaming PCs, workst
 └────────────┬────────────────────┘
              │
 ┌────────────▼────────────────────┐
-│      Services (Business)        │  ← Business logic
+│    Services (Business)          │  ← Business logic
 │  - PartService                  │
 │  - ProductService               │
 └────────────┬────────────────────┘
@@ -84,6 +85,7 @@ Computer parts retailers need to track both complete systems (gaming PCs, workst
 ┌────────────▼────────────────────┐
 │       H2 Database               │
 └─────────────────────────────────┘
+
 ```
 
 ### Data Model
