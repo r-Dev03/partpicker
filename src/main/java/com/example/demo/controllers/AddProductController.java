@@ -84,11 +84,9 @@ public class AddProductController {
         PartService partService1 = context.getBean(PartServiceImpl.class);
 
         int invDiff = product.getInv() - existingProduct.getInv(); 
-
-        if (invDiff > 0) { 
+        if (invDiff > 0) {
           for (Part p : existingProduct.getParts()) {
-            int newInv = p.getInv() - invDiff;
-            if (newInv < p.getMinimum()) {
+            if (p.getInv() - invDiff < p.getMinimum()) {
               bindingResult.rejectValue("inv", null,
                 "Cannot decrease part inventory: part '" + p.getName() + "' would go below minimum.");
               List<Part> availParts = new ArrayList<>();
@@ -99,10 +97,14 @@ public class AddProductController {
               theModel.addAttribute("assparts", existingProduct.getParts());
               return "productForm";
             }
-            p.setInv(newInv);
+          }
+
+          for (Part p : existingProduct.getParts()) {
+            p.setInv(p.getInv() - invDiff);
             partService1.save(p);
           }
         }
+
       } else { 
         product.setInv(0);
       }
