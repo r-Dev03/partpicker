@@ -1,377 +1,107 @@
 # PartPicker
 
-**Spring Boot Inventory Management System for Computer Parts Retail**
+**Inventory manager for a PC parts store, built with Spring Boot and Thymeleaf.**
 
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Thymeleaf](https://img.shields.io/badge/Thymeleaf-3.0-green.svg)](https://www.thymeleaf.org/)
-[![H2 Database](https://img.shields.io/badge/H2-Database-blue.svg)](https://www.h2database.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![H2](https://img.shields.io/badge/H2-Database-blue.svg)](https://www.h2database.com/)
 
-## Overview
+RigSmiths, a fictional PC builder, tracks individual parts (like RAM modules) and the prebuilt systems made from them. Every part has minimum and maximum stock levels, and buying a system pulls one of each linked part out of inventory.
 
-PartPicker is a web-based inventory management system designed for computer parts retailers. Built with Spring Boot and Thymeleaf, it manages products (complete PC builds) composed of individual parts (CPUs, GPUs, RAM, etc.) with inventory tracking, validation, and purchasing functionality.
+**Built on:** a Spring Boot + Thymeleaf inventory starter template that provided the parts and products CRUD screens and the domain model. Added in this repository: min/max inventory limits with custom validators, the Buy Now purchase flow, inline form errors for product edits that would break part minimums, duplicate-safe sample data, getter/setter tests for the new fields, and the RigSmiths store branding.
 
-**Core Features:**
-- Product and parts inventory management
-- Min/max inventory level enforcement with validation
-- Direct purchase workflow with inventory validation
-- Sample data initialization
-- Customized UI for computer parts retail
-- H2 database with web console
+## Highlights
 
-This project demonstrates Spring Boot MVC architecture, Thymeleaf templating, JPA entity relationships, and form validation.
+- Min/max inventory limits enforced by custom class-level validators
+- A purchase flow that checks every linked part before deducting any stock, so a failed purchase changes nothing
+- Product edits that would push a linked part below its minimum are rejected with an inline form error instead of crashing at save time
 
-## Business Context
+## How It Works
 
-Computer parts retailers need to track both complete systems (gaming PCs, workstations) and individual components (processors, graphics cards, memory modules). PartPicker provides:
+### Inventory limits
+Two custom constraints sit on the `Part` entity and compare its fields against each other:
 
-- **Products:** Complete PC builds or systems
-- **Parts:** Individual components that make up products
-- **Inventory Control:** Min/max thresholds to prevent stockouts and overstocking
-- **Purchase Validation:** Ensures inventory levels are maintained during sales
+```java
+@ValidPartInventory          // inv <= maximum
+@ValidPartInventoryMinimum   // inv >= minimum
+public abstract class Part implements Serializable { ... }
+```
+
+Spring validates both when a part form is submitted, so an out-of-range part shows an error on the form.
+
+### Editing a product
+Raising a product's inventory pulls the same amount of stock from each linked part. Those parts are saved directly, so once the minimums were added, a part dropping below its minimum failed validation at save time and crashed the request. The controller now checks every linked part first and rejects the edit with an inline error on the inventory field:
+
+```java
+for (Part p : existingProduct.getParts()) {
+    if (p.getInv() - invDiff < p.getMinimum()) {
+        bindingResult.rejectValue("inv", null,
+            "Cannot decrease part inventory: part '" + p.getName() + "' would go below minimum.");
+        ...
+        return "productForm";
+    }
+}
+```
+
+Only after every part passes does it deduct the stock and save.
+
+### Buying a product
+`Product.buyProduct()` checks everything before changing anything:
+
+```
+Buy Now clicked
+      │
+      ▼
+Product stock > 1? ── no ──────────────────────────┐
+      │ yes                                        │
+      ▼                                            │
+Every linked part above its minimum? ── no ────────┤
+      │ yes                                        │
+      ▼                                            ▼
+Deduct 1 from the product                Reject: error page,
+Deduct 1 from each linked part           no inventory changed
+      │
+      ▼
+Save → confirmation page
+```
+
+
+```java
+public boolean buyProduct() {
+    if (this.inv <= 1) return false;
+    for (Part part : this.getParts()) {
+        if (part.getInv() <= part.getMinimum()) return false;
+    }
+    this.inv--;
+    for (Part part : this.getParts()) part.setInv(part.getInv() - 1);
+    return true;
+}
+```
+
+If the product is nearly out of stock, or any linked part is already at its minimum, the purchase is rejected and no inventory moves. Otherwise the product and each of its parts drop by one, and the user sees a confirmation page.
+
+## Getting Started
+
+**Prerequisites:** Java 17
+
+```bash
+git clone https://github.com/r-Dev03/partpicker.git
+cd partpicker
+./mvnw spring-boot:run
+```
+
+Open `http://localhost:8080`. On first run, the app loads 5 RAM modules and 5 prebuilt systems (SF400 to SF2000). Each set only loads when its table is empty, so restarts don't create duplicates.
+
+Data is stored in an H2 file database at `~/partpicker`. To inspect it, open `http://localhost:8080/h2-console` with JDBC URL `jdbc:h2:file:~/partpicker`, user `sa`, and a blank password.
+
+Run the tests with `./mvnw test`.
 
 ## Tech Stack
 
-**Backend:**
-- Java 17
-- Spring Boot 2.7
-- Spring MVC
-- Spring Data JPA
-- Hibernate ORM
+Java 17 · Spring Boot · Spring MVC · Spring Data JPA / Hibernate · Bean Validation · Thymeleaf · Bootstrap 5 (main screen) · H2 · Maven
 
-**Frontend:**
-- Thymeleaf (server-side templating)
-- Bootstrap 4
-- HTML5/CSS3
+## Known Limitations
 
-**Database:**
-- H2 Database (file-based persistence)
-- H2 Console (web-based database viewer)
-
-**Build Tool:**
-- Maven
-
-**Development:**
-- IntelliJ IDEA Ultimate Edition
-
-## Architecture
-
-### MVC Pattern
-```
-┌─────────────────────────────────┐
-│      Browser (Client)           │
-└────────────┬────────────────────┘
-             │ HTTP
-┌────────────▼────────────────────┐
-│    Controllers (MVC)            │  ← Handle requests
-│  - MainScreenController         │
-│  - AddInhousePartController     │
-│  - AddProductController         │
-└────────────┬────────────────────┘
-             │
-┌────────────▼────────────────────┐
-│    Services (Business)          │  ← Business logic
-│  - PartService                  │
-│  - ProductService               │
-└────────────┬────────────────────┘
-             │
-┌────────────▼────────────────────┐
-│    Repositories (Data)          │  ← Data access
-│  - PartRepository               │
-│  - ProductRepository            │
-└────────────┬────────────────────┘
-             │ JPA
-┌────────────▼────────────────────┐
-│       H2 Database               │
-└─────────────────────────────────┘
-```
-
-### Data Model
-
-**Part (Abstract)**
-- `InhousePart`: Parts manufactured in-house
-- `OutsourcedPart`: Parts from external suppliers
-- Fields: ID, name, price, inventory, min, max
-
-**Product**
-- Complete PC builds/systems
-- Fields: ID, name, price, inventory
-- Many-to-many relationship with Parts
-
-## Installation
-
-### Prerequisites
-```bash
-# Java 17 or higher
-java -version
-```
-
-### Setup
-```bash
-# Clone repository
-git clone https://github.com/r-Dev03/partpicker.git
-cd partpicker
-
-# Build with Maven
-mvn clean install
-
-# Run the application
-mvn spring-boot:run
-```
-
-Access the application at: `http://localhost:8080`
-
-## Database Configuration
-
-PartPicker uses H2, a lightweight Java database that stores data in a file.
-
-**Current Configuration** (`src/main/resources/application.properties`):
-```properties
-# H2 Console
-spring.h2.console.enabled=true
-spring.h2.console.path=/h2-console
-
-# Database (file-based persistence)
-spring.datasource.url=jdbc:h2:file:~/partpicker
-spring.datasource.username=sa
-spring.datasource.password=
-spring.datasource.driverClassName=org.h2.Driver
-
-# Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-```
-
-### Accessing H2 Console
-
-View and query the database directly through the web console:
-
-1. Start the application: `mvn spring-boot:run`
-2. Navigate to: `http://localhost:8080/h2-console`
-3. Enter connection details:
-   - **JDBC URL:** `jdbc:h2:file:~/partpicker`
-   - **Username:** `sa`
-   - **Password:** (leave blank)
-4. Click "Connect"
-
-**Tip:** You can query tables directly:
-```sql
-SELECT * FROM part;
-SELECT * FROM product;
-```
-
-**Note:** The database file will be created as `partpicker.mv.db` in your home directory.
-
-## Usage
-
-### Main Inventory Screen
-
-The main screen displays:
-- **Parts List:** Computer parts inventory
-- **Products List:** Complete PC builds
-- Actions: Add, Update, Delete for both parts and products
-
-### Adding Parts
-
-**In-House Parts** (manufactured internally):
-1. Click "Add In-House Part"
-2. Enter: Name, Price, Inventory, Min, Max, Part ID
-3. Submit
-
-**Outsourced Parts** (from suppliers):
-1. Click "Add Outsourced Part"
-2. Enter: Name, Price, Inventory, Min, Max, Company Name
-3. Submit
-
-**Validation:**
-- Inventory must be between Min and Max
-- Price must be positive
-- All fields required
-
-### Adding Products
-
-1. Click "Add Product"
-2. Enter product details (e.g., "Gaming PC RTX 4090")
-3. Select associated parts from available inventory
-4. Submit
-
-### Purchasing Products
-
-1. Click "Buy Now" next to any product
-2. System validates:
-   - Product inventory > 0
-   - Part inventory levels meet minimum thresholds
-3. Displays confirmation or error page with specific error messages
-
-### About Page
-
-Navigate to "About" to view company information and navigation back to main screen.
-
-## Project Structure
-```
-partpicker/
-├── mvnw                         # Maven wrapper (Unix)
-├── mvnw.cmd                     # Maven wrapper (Windows)
-├── pom.xml                      # Maven dependencies
-├── flake.nix                    # Nix development environment
-├── flake.lock                   # Nix lock file
-├── README.md
-└── src/
-    ├── main/
-    │   ├── java/
-    │   │   └── com/example/demo/
-    │   │       ├── bootstrap/
-    │   │       │   └── BootStrapData.java       # Sample data loader
-    │   │       ├── controllers/
-    │   │       │   ├── MainScreenController.java
-    │   │       │   ├── AddInhousePartController.java
-    │   │       │   ├── AddOutsourcedPartController.java
-    │   │       │   ├── AddProductController.java
-    │   │       │   └── BuyProductController.java
-    │   │       ├── domain/
-    │   │       │   ├── Part.java
-    │   │       │   ├── InhousePart.java
-    │   │       │   ├── OutsourcedPart.java
-    │   │       │   └── Product.java
-    │   │       ├── repositories/
-    │   │       │   ├── PartRepository.java
-    │   │       │   └── ProductRepository.java
-    │   │       ├── service/
-    │   │       │   ├── PartService.java
-    │   │       │   ├── PartServiceImpl.java
-    │   │       │   ├── ProductService.java
-    │   │       │   └── ProductServiceImpl.java
-    │   │       └── validators/
-    │   │           └── ValidInventory.java      # Min/max validation
-    │   └── resources/
-    │       ├── templates/                        # Thymeleaf templates
-    │       │   ├── mainscreen.html
-    │       │   ├── about.html
-    │       │   ├── InhousePartForm.html
-    │       │   ├── OutsourcedPartForm.html
-    │       │   ├── productForm.html
-    │       │   ├── confirmationbuyproduct.html
-    │       │   └── errorbuyproduct.html
-    │       └── application.properties
-    └── test/
-        └── java/
-            └── com/example/demo/
-                └── domain/
-                    └── PartTest.java             # Unit tests
-```
-
-## Key Features Explained
-
-### Min/Max Inventory Validation
-
-Custom validator enforces inventory constraints:
-```java
-@ValidInventory  // Custom annotation
-public class Part {
-    private int inv;      // Current inventory
-    private int minInv;   // Minimum threshold
-    private int maxInv;   // Maximum threshold
-}
-```
-
-**Validation Rules:**
-- `inv >= minInv`: Prevents stockouts
-- `inv <= maxInv`: Prevents overstocking
-- Enforced on create and update operations
-
-**Error Messages:**
-- "Inventory cannot be less than minimum"
-- "Inventory cannot exceed maximum"
-- "Minimum cannot be greater than maximum"
-
-### Buy Now Functionality
-```java
-@GetMapping("/buyproduct")
-public String buyProduct(@RequestParam("productID") int pId, Model pModel) {
-    ProductService productService = context.getBean(ProductServiceImpl.class);
-    Product product2 = productService.findById(pId);
-    try {
-        boolean purchaseConfirmation = product2.buyProduct();
-        if (purchaseConfirmation) {
-            productService.save(product2);
-            return "confirmationbuyproduct";
-        }
-        pModel.addAttribute("errorMessage",
-            "Purchase failed: One or more parts do not have enough inventory to complete the order.");
-        return "errorbuyproduct";
-    } catch (javax.validation.ConstraintViolationException e) {
-        pModel.addAttribute("errorMessage", 
-            "Purchase failed: A part's inventory cannot be lower than its required minimum.");
-        return "errorbuyproduct";
-    } catch (Exception e) {
-        pModel.addAttribute("errorMessage", "An unexpected error occurred while processing the purchase.");
-        return "errorbuyproduct";
-    }
-}
-```
-
-**Purchase Logic:**
-- Calls `buyProduct()` method on Product entity
-- Validates inventory constraints before completing purchase
-- Returns confirmation page on success
-- Returns error page with specific error messages on failure
-- Handles validation exceptions for inventory minimum thresholds
-
-### Sample Data Loading
-```java
-@Component
-public class BootStrapData implements CommandLineRunner {
-    @Override
-    public void run(String... args) {
-        if (partRepository.count() == 0 && productRepository.count() == 0) {
-            // Load sample parts and products
-        }
-    }
-}
-```
-
-**Sample Data:**
-- 5 RAM modules (4GB, 8GB, 16GB, 32GB, 64GB)
-- 1 pre-built computer system
-- Only loads when database is empty to prevent duplicates
-
-## Testing
-
-The project includes unit tests for the Part entity covering basic getter/setter functionality, object equality, and toString implementations.
-
-**Run tests:**
-```bash
-mvn test
-```
-
-## Development Workflow
-
-### Option 1: Standard Maven
-```bash
-mvn spring-boot:run
-```
-
-### Option 2: Nix Development Environment
-```bash
-nix develop
-mvn spring-boot:run
-```
-
-The Nix environment provides consistent development dependencies across different machines.
-
-## Limitations
-
-- No user authentication (single-user system)
-- No shopping cart (single-item purchases only)
-- Parts inventory not decremented on product sale (simplified model)
-- No supplier management beyond company name
-- No reporting or analytics
-- File-based H2 database (not production-ready for multi-user scenarios)
-- Products don't track which specific part instances they use
-- No multi-quantity purchases
-- No order history
-- No customer management
-
-## License
-
-MIT License - see LICENSE file for details
+- **Single-unit purchases.** Buy Now sells one system at a time.
+- **No order history.** Purchases change inventory counts but aren't recorded.
+- **No authentication.** Anyone with the URL can edit inventory.
